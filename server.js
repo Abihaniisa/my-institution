@@ -1,18 +1,27 @@
-
 const express = require('express');
 const app = express();
 app.use(express.json());
 
 // ═══════════════════════════════════════════════════════════
-// CONFIGURATION — replace with your real values
+// CONFIGURATION — read from environment variables ONLY.
+// The server will refuse to start if either is missing.
 // ═══════════════════════════════════════════════════════════
+const VERITAS_API_KEY = process.env.VERITAS_API_KEY;
+const FETCH_URL = process.env.FETCH_URL;
 const VERITAS_URL = 'https://veritas-backend-production-aa12.up.railway.app';
-const VERITAS_API_KEY = process.env.VERITAS_API_KEY || 'vt_live_REPLACE_ME';
-const FETCH_URL = process.env.FETCH_URL || 'https://your-server.example.com/veritas/fetch';
+
+if (!VERITAS_API_KEY) {
+  console.error('FATAL: VERITAS_API_KEY env var is missing. Set it on your host.');
+  process.exit(1);
+}
+if (!FETCH_URL) {
+  console.error('FATAL: FETCH_URL env var is missing. Set it on your host.');
+  process.exit(1);
+}
 
 // ═══════════════════════════════════════════════════════════
-// YOUR DATA — replace this array with a database query.
-// The shape below is illustrative. Your fields are yours.
+// YOUR DATA — for the demo, a hardcoded array.
+// For production, replace with a database query.
 // ═══════════════════════════════════════════════════════════
 const MY_STUDENTS = [
   {
@@ -39,7 +48,6 @@ const MY_STUDENTS = [
 async function runSync() {
   const results = [];
 
-  // Step 1: register the fetch URL with Veritas (idempotent)
   try {
     const res = await fetch(`${VERITAS_URL}/api/set-fetch-url`, {
       method: 'POST',
@@ -51,7 +59,6 @@ async function runSync() {
     results.push({ step: 'set-fetch-url', ok: false, error: String(err) });
   }
 
-  // Step 2: register a pointer for each citizen
   for (const student of MY_STUDENTS) {
     try {
       const res = await fetch(`${VERITAS_URL}/api/register`, {
