@@ -3,25 +3,23 @@ const app = express();
 app.use(express.json());
 
 // ═══════════════════════════════════════════════════════════
-// CONFIGURATION — read from environment variables ONLY.
-// The server will refuse to start if either is missing.
+// CONFIGURATION — from environment variables only
 // ═══════════════════════════════════════════════════════════
 const VERITAS_API_KEY = process.env.VERITAS_API_KEY;
 const FETCH_URL = process.env.FETCH_URL;
 const VERITAS_URL = 'https://veritas-backend-production-aa12.up.railway.app';
 
 if (!VERITAS_API_KEY) {
-  console.error('FATAL: VERITAS_API_KEY env var is missing. Set it on your host.');
+  console.error('FATAL: VERITAS_API_KEY env var is missing.');
   process.exit(1);
 }
 if (!FETCH_URL) {
-  console.error('FATAL: FETCH_URL env var is missing. Set it on your host.');
+  console.error('FATAL: FETCH_URL env var is missing.');
   process.exit(1);
 }
 
 // ═══════════════════════════════════════════════════════════
-// YOUR DATA — for the demo, a hardcoded array.
-// For production, replace with a database query.
+// YOUR DATA — hardcoded for the demo
 // ═══════════════════════════════════════════════════════════
 const MY_STUDENTS = [
   {
@@ -43,7 +41,7 @@ const MY_STUDENTS = [
 ];
 
 // ═══════════════════════════════════════════════════════════
-// THE SYNC LOGIC — called by the button
+// SYNC LOGIC
 // ═══════════════════════════════════════════════════════════
 async function runSync() {
   const results = [];
@@ -80,7 +78,7 @@ async function runSync() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// THE TRIGGER ROUTE — the button calls this
+// ROUTES
 // ═══════════════════════════════════════════════════════════
 app.post('/sync', async (req, res) => {
   try {
@@ -91,9 +89,6 @@ app.post('/sync', async (req, res) => {
   }
 });
 
-// ═══════════════════════════════════════════════════════════
-// THE READ ENDPOINT — Veritas calls this
-// ═══════════════════════════════════════════════════════════
 app.get('/veritas/fetch', (req, res) => {
   const nin = req.query.nin;
   if (!nin) return res.json({ credentials: [] });
@@ -111,9 +106,6 @@ app.get('/veritas/fetch', (req, res) => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════
-// SERVE THE BUTTON UI
-// ═══════════════════════════════════════════════════════════
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.send(`<!DOCTYPE html>
@@ -158,7 +150,7 @@ app.get('/', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════
-// START
+// START — bind to 0.0.0.0 so Railway's proxy can reach it
 // ═══════════════════════════════════════════════════════════
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Institution server on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Institution server on port ${PORT}`));
